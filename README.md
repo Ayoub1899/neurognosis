@@ -18,7 +18,7 @@ Le modèle est entraîné pour classer les IRM en 4 catégories :
 ### 1. Cloner le dépôt
 
 ```bash
-git clone https://github.com/ton-utilisateur/neurognosis.git
+git clone https://github.com/Ayoub1899/neurognosis.git
 cd neurognosis
 ```
 
