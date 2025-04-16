@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détection de Tumeur Cérébrale par IA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-brain"></i> Neurognosis IA</h1>
+            <p class="subtitle">Système de détection de tumeurs cérébrales par intelligence artificielle</p>
+        </header>
+
+        <main>
+            <div class="upload-section">
+                <h2>Analyse d'IRM Cérébrale</h2>
+                <p class="instructions">Téléchargez une image IRM pour analyse automatique</p>
+
+                <form method="POST" enctype="multipart/form-data" id="upload-form">
+                    <div class="file-upload">
+                        <div class="file-upload-area" id="drop-area">
+                            <input type="file" name="image" id="file-input" accept="image/*" required>
+                            <label for="file-input">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <span id="file-name">Choisir une image ou glisser-déposer</span>
+                            </label>
+                        </div>
+                        <button type="submit" class="btn-analyze"><i class="fas fa-search"></i> Analyser</button>
+                    </div>
+                </form>
+
+                <div class="loader-container" id="loader">
+                    <div class="loader"></div>
+                    <p>Analyse en cours...</p>
+                </div>
+            </div>
+
+            {% if prediction %}
+            <div class="results-section animate-in">
+                <h2>Résultat de l'analyse</h2>
+                <div class="results-container">
+                    <div class="image-preview">
+                        <img src="{{ image_path }}" alt="IRM analysée">
+                    </div>
+                    <div class="diagnosis">
+                        <div class="result-card {% if prediction == 'notumor' %}result-normal{% else %}result-tumor{% endif %}">
+                            <h3>Diagnostic :</h3>
+                            {% if prediction == 'notumor' %}
+                                <p class="result normal"><i class="fas fa-check-circle"></i> Aucune tumeur détectée</p>
+                            {% else %}
+                                <p class="result tumor"><i class="fas fa-exclamation-triangle"></i> Tumeur détectée</p>
+                                <p class="tumor-type">Type: <span>{{ prediction }}</span></p>
+                            {% endif %}
+
+                            <div class="info-box">
+                                <h4><i class="fas fa-info-circle"></i> À propos de ce résultat</h4>
+                                {% if prediction == 'glioma' %}
+                                    <p>Le gliome est une tumeur qui se développe à partir des cellules gliales du cerveau.</p>
+                                {% elif prediction == 'meningioma' %}
+                                    <p>Le méningiome est une tumeur qui se développe à partir des méninges, les membranes qui enveloppent le cerveau.</p>
+                                {% elif prediction == 'pituitary' %}
+                                    <p>La tumeur hypophysaire (pituitaire) se développe dans la glande pituitaire située à la base du cerveau.</p>
+                                {% else %}
+                                    <p>Aucune anomalie tumorale n'a été détectée sur cette image IRM.</p>
+                                {% endif %}
+                                <p class="disclaimer">Ce résultat est fourni par un système d'IA et doit être confirmé par un professionnel de santé.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-new-analysis" onclick="resetForm()"><i class="fas fa-redo"></i> Nouvelle analyse</button>
+            </div>
+            {% endif %}
+        </main>
+
+        <footer>
+            <p>Neurognosis IA &copy; 2025 - Système de détection automatique par intelligence artificielle</p>
+            <p class="disclaimer">Cet outil est conçu pour l'assistance au diagnostic et ne remplace pas l'avis médical professionnel.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Afficher le nom du fichier sélectionné
+        document.getElementById('file-input').addEventListener('change', function() {
+            const fileName = this.files[0] ? this.files[0].name : 'Choisir une image ou glisser-déposer';
+            document.getElementById('file-name').textContent = fileName;
+        });
+
+        // Animation de chargement
+        document.getElementById('upload-form').addEventListener('submit', function() {
+            document.getElementById('loader').style.display = 'flex';
+        });
+
+        // Support du glisser-déposer
+        const dropArea = document.getElementById('drop-area');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropArea.classList.add('highlight');
+        }
+
+        function unhighlight() {
+            dropArea.classList.remove('highlight');
+        }
+
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            document.getElementById('file-input').files = files;
+            document.getElementById('file-name').textContent = files[0].name;
+        }
+
+        // Fonction pour réinitialiser le formulaire
+        function resetForm() {
+            document.getElementById('file-input').value = '';
+            document.getElementById('file-name').textContent = 'Choisir une image ou glisser-déposer';
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>
