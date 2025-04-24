@@ -34,6 +34,15 @@ def index():
     image_path = None
 
     if request.method == 'POST':
+        # Vider le dossier uploads avant de sauvegarder une nouvelle image
+        for filename in os.listdir(app.config['UPLOAD_FOLDER']):
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            try:
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+            except Exception as e:
+                print(f"Erreur lors de la suppression de {file_path} : {e}")
+
         if 'image' not in request.files:
             return "No file part"
         file = request.files['image']
@@ -54,6 +63,7 @@ def index():
                 prediction = class_names[predicted.item()]
 
     return render_template('index.html', prediction=prediction, image_path=image_path)
+
 
 
 if __name__ == '__main__':
